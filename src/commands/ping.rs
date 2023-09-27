@@ -7,7 +7,7 @@ use serenity::{
 use super::{respond_text, HandleError};
 
 pub const NAME: &str = "ping";
-const DESCRIPTION: &str = "A ping command";
+const DESCRIPTION: &str = "Ping!";
 
 pub fn register(
   command: &mut CreateApplicationCommand,

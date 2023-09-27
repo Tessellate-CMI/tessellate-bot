@@ -6,13 +6,12 @@ use serenity::{
   prelude::Context,
   utils::Color,
 };
-use tracing::error;
 
 use super::HandleError;
 use crate::ConfigData;
 
 pub const NAME: &str = "deploy";
-const DESCRIPTION: &str = "Deploy frontend to Cloudflare Pages";
+const DESCRIPTION: &str = "Deploy frontend to Cloudflare";
 
 pub fn register(
   command: &mut CreateApplicationCommand,
@@ -29,32 +28,32 @@ pub async fn run(
 
   let resp = config.cloudflare.create_deployment().await?;
 
-  for err in resp.errors {
-    error!("Deployment error: {err:?}");
-  }
-
-  Ok(
-    command
-      .create_interaction_response(&ctx.http, |response| {
-        response
-          .kind(InteractionResponseType::ChannelMessageWithSource)
-          .interaction_response_data(|message| {
-            message.embed(|embed| {
+  command
+    .create_interaction_response(&ctx.http, |response| {
+      response
+        .kind(InteractionResponseType::ChannelMessageWithSource)
+        .interaction_response_data(|message| {
+          message.embed(|embed| {
+            if resp.success {
               embed
-                .title("Deployment!")
+                .title("Deployment request sent!")
                 .url(resp.result.url)
-                .color(if resp.success {
-                  Color::BLUE
-                } else {
-                  Color::RED
-                })
+                .color(Color::BLUE)
+                .field("ID", resp.result.id.to_string(), false)
+            } else {
+              embed
+                .title("Deployment request failed!")
+                .url(resp.result.url)
+                .color(Color::RED)
                 .fields([
                   ("ID", resp.result.id.to_string(), false),
-                  ("Success", resp.success.to_string(), false),
+                  ("Error", resp.errors.to_string(), false),
                 ])
-            })
+            }
           })
-      })
-      .await?,
-  )
+        })
+    })
+    .await?;
+
+  Ok(())
 }

@@ -1,4 +1,5 @@
 mod deploy;
+mod logs;
 mod ping;
 mod totp;
 
@@ -29,7 +30,7 @@ macro_rules! register {
 pub fn register(
   commands: &mut CreateApplicationCommands,
 ) -> &mut CreateApplicationCommands {
-  register!(commands, ping, deploy, totp)
+  register!(commands, ping, deploy, logs, totp)
 }
 
 async fn respond_text(
@@ -56,6 +57,9 @@ pub enum HandleError {
 
   #[error(transparent)]
   Cloudflare(#[from] CloudflareError),
+
+  #[error("Option not found: {0}")]
+  OptionNF(String),
 }
 
 macro_rules! handle {
@@ -77,7 +81,7 @@ pub async fn handle(
   let config = data.get::<ConfigData>().unwrap();
 
   if config.restrict.allowed(ctx, command).await? {
-    handle!(ctx, command, ping, deploy, totp)
+    handle!(ctx, command, ping, deploy, logs, totp)
   } else {
     warn!("Denied access: {command:?}");
     Ok(respond_text(ctx, command, "**Access Denied!**").await?)

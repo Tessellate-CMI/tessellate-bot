@@ -13,7 +13,7 @@ use super::{respond_text, HandleError};
 use crate::ConfigData;
 
 pub const NAME: &str = "totp";
-const DESCRIPTION: &str = "TOTP command";
+const DESCRIPTION: &str = "Generate TOTP";
 
 pub fn register(
   command: &mut CreateApplicationCommand,
