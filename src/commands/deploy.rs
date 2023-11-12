@@ -1,7 +1,9 @@
+use serde_json::Value;
 use serenity::{
   builder::CreateApplicationCommand,
   model::prelude::{
-    application_command::ApplicationCommandInteraction, InteractionResponseType,
+    application_command::ApplicationCommandInteraction,
+    command::CommandOptionType, InteractionResponseType,
   },
   prelude::Context,
   utils::Color,
@@ -16,7 +18,15 @@ const DESCRIPTION: &str = "Deploy frontend to Cloudflare";
 pub fn register(
   command: &mut CreateApplicationCommand,
 ) -> &mut CreateApplicationCommand {
-  command.name(NAME).description(DESCRIPTION)
+  command
+    .name(NAME)
+    .description(DESCRIPTION)
+    .create_option(|option| {
+      option
+        .kind(CommandOptionType::String)
+        .name("branch")
+        .description("Branch")
+    })
 }
 
 pub async fn run(
@@ -26,7 +36,13 @@ pub async fn run(
   let data = ctx.data.read().await;
   let config = data.get::<ConfigData>().unwrap();
 
-  let resp = config.cloudflare.create_deployment().await?;
+  let branch = command
+    .data
+    .options
+    .first()
+    .and_then(|option| option.value.as_ref().and_then(Value::as_str));
+
+  let resp = config.cloudflare.create_deployment(branch).await?;
 
   command
     .create_interaction_response(&ctx.http, |response| {

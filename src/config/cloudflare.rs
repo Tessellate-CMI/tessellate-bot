@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, string::ToString};
 
 use reqwest::Client;
 use serde::Deserialize;
@@ -56,6 +56,7 @@ pub struct DeploymentResult {
 impl Cloudflare {
   pub async fn create_deployment(
     &self,
+    branch: Option<&str>,
   ) -> Result<CreateDeployment, CloudflareError> {
     Ok(serde_json::from_slice(
       &Client::new()
@@ -65,6 +66,7 @@ impl Cloudflare {
           self.project_name
         ))
         .bearer_auth(self.api_key.to_string())
+        .body(branch.map_or(String::new(), ToString::to_string))
         .send()
         .await?
         .bytes()
