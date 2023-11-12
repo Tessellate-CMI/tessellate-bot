@@ -30,7 +30,7 @@ COPY --from=build \
   /etc/ssl/certs/ca-certificates.crt \
   /etc/ssl/certs/ca-certificates.crt
 COPY --from=build \
-  /app/target/release/tessellate \
-  /usr/bin/tessellate
+  /app/target/release/tessellate-bot \
+  /usr/bin/tessellate-bot
 
-ENTRYPOINT ["tessellate"]
+ENTRYPOINT ["tessellate-bot"]

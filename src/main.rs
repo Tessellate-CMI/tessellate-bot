@@ -23,7 +23,7 @@ async fn main() {
   tracing_subscriber::fmt().init();
 
   let config = match Config::from_file(
-    env::var("TESSELLATE_CONFIG_PATH").unwrap_or("config.yml".to_string()),
+    env::var("CONFIG_PATH").unwrap_or("config.yml".to_string()),
   ) {
     Ok(c) => c,
     Err(err) => {
